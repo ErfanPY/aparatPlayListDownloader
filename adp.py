@@ -1,6 +1,7 @@
 import argparse
 import requests as req
 from bs4 import BeautifulSoup as bs
+import progressbar
 
 def usage():
     return """
@@ -13,6 +14,7 @@ def usage():
     """
 
 def main():
+    print("Please wait...")
     mainPage = req.get(link).content
 
     playlist = bs(mainPage, 'html.parser').find_all('div', attrs={'class':'playlist-body'})[0]
@@ -20,15 +22,26 @@ def main():
 
     videoPages = ['https://www.aparat.com'+video.get('href') for video in playListLinks]
 
+    count=len(videoPages)
+    print("This playlist contains %d videos"%count)
+    
+    bar=progressbar.ProgressBar(maxval=count,
+    widgets=[progressbar.Bar('=','[',']'),progressbar.Percentage()])
+    bar.start()
+
     links = []
-    for page in videoPages :
+    for index,page in enumerate(videoPages) :
+        bar.update(index+1)
         html = req.get(page).content
         soup = bs(html, 'html.parser')
         qualitys = soup.find_all('div', attrs={'class':'dropdown-content'})[0].find_all('a')
         for qual in qualitys :
             if quality in qual.get('aria-label'):
                 links.append(qual.get('href'))
-
+    
+    bar.finish()
+    print("writing download list ...")
+    
     with open('downloadList.txt', 'a') as file:
         [file.write(link+'\n') for link in links]
 
