@@ -14,28 +14,35 @@ def usage():
 
 def main():
     mainPage = req.get(link).content
+    main_soup = bs(mainPage, 'html.parser')
+    main_name = main_soup.find("span", attrs={"class":"d-in v-m"}).text.encode()
 
-    playlist = bs(mainPage, 'html.parser').find_all('div', attrs={'class':'playlist-body'})[0]
+    playlist = main_soup.find_all('div', attrs={'class':'playlist-body'})[0]
     playListLinks = playlist.find_all('a', attrs={'class':'title'})
 
-    videoPages = ['https://www.aparat.com'+video.get('href') for video in playListLinks]
+    videoPages = [f"https://www.aparat.com{video.get('href')}" for video in playListLinks]
 
-    links = []
+    links = {}
     for page in videoPages :
         html = req.get(page).content
         soup = bs(html, 'html.parser')
+        name = soup.find("h1", attrs={"id":"videoTitle", "class":"title"}).text.encode()
         qualitys = soup.find_all('div', attrs={'class':'dropdown-content'})[0].find_all('a')
         for qual in qualitys :
             if quality in qual.get('aria-label'):
-                links.append(qual.get('href'))
+                links[name] = qual.get('href')
 
     with open('downloadList.txt', 'a') as file:
-        [file.write(link+'\n') for link in links]
+        file.write(f"{main_name}--{quality}\n")
+        [file.write(f"{name}:{link}\n") for name, link in links.items()]
 
 
 
 if __name__ == "__main__":
-
+    link = "https://www.aparat.com/v/fAZSV?playlist=288572"
+    quality = "720"
+    main()
+    """
     parser = argparse.ArgumentParser(description="Aparat Playlist Downloader(APD)", usage=usage())
     parser.add_argument("link", help="main page Link")
     parser.add_argument("-q", "--quality", help="eg: [124, 360, 480, 720, ...]", default='480')
@@ -49,3 +56,4 @@ if __name__ == "__main__":
         main()
     else:
         usage()
+    """
