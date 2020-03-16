@@ -41,6 +41,7 @@ def main():
         soup = bs(html, 'html.parser')
         name = soup.find("h1", attrs={"id":"videoTitle", "class":"title"}).text.encode()
         qualitys = soup.find('div', attrs={'class':'dropdown-content'}).find_all('a')
+        # TODO change this method
         for qual in qualitys :
             if quality in qual.get('aria-label'):
                 links[name] = qual.get('href')
