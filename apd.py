@@ -44,12 +44,14 @@ def main():
         for qual in qualitys :
             if quality in qual.get('aria-label'):
                 links[name] = qual.get('href')
+            elif "480" in qual.get('aria-label'):
+                links[name] = qual.get('href')
     bar.finish()
     print("writing download list ...")
     
-    with open('apd_output.txt', 'a') as file:
-        file.write(f"{main_name}--{quality}\n")
-        [file.write(f"{name}:{link}\n") for name, link in links.items()]
+    with open('apd_output.sh', 'a') as file:
+        file.write(f"#!/bin/bash\n")
+        [file.write(f"aria2c -x16 -s16 -k1M {link} -o \"{name.decode('utf-8')}.mp4\"\n") for name, link in links.items()]
 
 
 
@@ -68,4 +70,3 @@ if __name__ == "__main__":
         main()
     else:
         usage()
-
