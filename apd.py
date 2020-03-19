@@ -10,7 +10,7 @@ import progressbar
 def usage():
     return """
         Use "" around link to avoid bad things :>
-        adp.py "{Link}" [quality]
+        adp.py "Link" [quality]
         python apd.py "https://www.aparat.com/v/d13rh3"
         python apd.py "https://www.aparat.com/v/d13rh3" -q 480
 
@@ -52,7 +52,10 @@ def main():
     
     with open('apd_output.sh', 'a') as file:
         file.write(f"#!/bin/bash\n")
-        [file.write(f"aria2c -x16 -s16 -k1M {link} -o \"{name.decode('utf-8')}.mp4\"\n") for name, link in links.items()]
+        i = 1
+        for name, videoLink in links.items():
+            file.write('aria2c -x16 -s16 -k1M {} -o \"{:03d}_{}.mp4\"\n'.format(videoLink,i,name.decode('utf-8')))
+            i += 1
 
 
 
@@ -71,3 +74,4 @@ if __name__ == "__main__":
         main()
     else:
         usage()
+
