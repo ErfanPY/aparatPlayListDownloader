@@ -10,7 +10,7 @@ import progressbar
 def usage():
     return """
         Use "" around link to avoid bad things :>
-        adp.py "{Link}" [quality]
+        adp.py "Link" [quality]
         python apd.py "https://www.aparat.com/v/d13rh3"
         python apd.py "https://www.aparat.com/v/d13rh3" -q 480
 
@@ -41,15 +41,21 @@ def main():
         soup = bs(html, 'html.parser')
         name = soup.find("h1", attrs={"id":"videoTitle", "class":"title"}).text.encode()
         qualitys = soup.find('div', attrs={'class':'dropdown-content'}).find_all('a')
+        # TODO change this method
         for qual in qualitys :
             if quality in qual.get('aria-label'):
+                links[name] = qual.get('href')
+            elif "480" in qual.get('aria-label'):
                 links[name] = qual.get('href')
     bar.finish()
     print("writing download list ...")
     
-    with open('apd_output.txt', 'a') as file:
-        file.write(f"{main_name}--{quality}\n")
-        [file.write(f"{name}:{link}\n") for name, link in links.items()]
+    with open('apd_output.sh', 'a') as file:
+        file.write(f"#!/bin/bash\n")
+        i = 1
+        for name, videoLink in links.items():
+            file.write('aria2c -x16 -s16 -k1M {} -o \"{:03d}_{}.mp4\"\n'.format(videoLink,i,name.decode('utf-8')))
+            i += 1
 
 
 
