@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import io
 import argparse
 import requests as req
 from bs4 import BeautifulSoup as bs
@@ -50,7 +51,7 @@ def main():
     bar.finish()
     print("writing download list ...")
     
-    with open('apd_output.sh', 'a') as file:
+    with io.open('apd_output.sh', "a", encoding="utf-8") as file:
         file.write(f"#!/bin/bash\n")
         i = 1
         for name, videoLink in links.items():
